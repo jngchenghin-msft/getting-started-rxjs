@@ -1,1 +1,1 @@
-alert("ok!!");
+alert("ok USA or NOT!! Come to Japan!");
