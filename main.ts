@@ -1,27 +1,22 @@
-// import { Observable, map, filter } from "rxjs";
-
-import { Observable } from "rxjs/internal/Observable";
+import { fromEvent } from "rxjs";
 import { map } from "rxjs/internal/operators/map";
 import { filter } from "rxjs/internal/operators/filter";
+import { delay } from "rxjs/internal/operators/delay";
 
-let numbers = [1, 5, 10];
-let source = new Observable<number>(observer => {
-    let index = 0;
-    let produceValue = () => {
-        observer.next(numbers[index++]);
+let source = fromEvent(document, "mousemove")
+    .pipe(
+        map((n: MouseEvent) => ({ x: n.clientX, y: n.clientY })), 
+        filter(value => value.x < 500),
+        delay(300));
 
-        if (index < numbers.length) {
-            setTimeout(produceValue, 200);
-        } else {
-            observer.complete();
-        }
-    }
-
-    produceValue();
-}).pipe(map(n => n * 2), filter(n => n > 4));
+let circle = document.getElementById("circle");
+const onNext = value => {
+    circle.style.left = value.x;
+    circle.style.top = value.y;
+}
 
 source.subscribe({
-    next: value => console.log(`value: ${value}`),
+    next: onNext,
     error: err => console.log(`err: ${err}`),
     complete: () => console.log('complete')
 });
