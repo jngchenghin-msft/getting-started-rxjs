@@ -1,4 +1,4 @@
-import { fromEvent } from "rxjs";
+import { fromEvent } from "rxjs/internal/observable/fromEvent";
 import { map } from "rxjs/internal/operators/map";
 import { filter } from "rxjs/internal/operators/filter";
 import { delay } from "rxjs/internal/operators/delay";
