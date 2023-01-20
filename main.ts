@@ -46,7 +46,7 @@ function renderMovies(movies) {
     })
 }
 
-click.pipe(mergeMap(e => load("moviesasd.json"))).subscribe({
+click.pipe(mergeMap(e => load("movies.json"))).subscribe({
     next: renderMovies,
     error: err => console.log(`err: ${err}`),
     complete: () => console.log('complete')
