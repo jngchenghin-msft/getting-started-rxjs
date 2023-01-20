@@ -5,6 +5,8 @@ import { retryWhen } from "rxjs/internal/operators/retryWhen";
 import { delay } from "rxjs/internal/operators/delay"
 import { scan } from "rxjs/internal/operators/scan";
 import { takeWhile } from "rxjs/internal/operators/takeWhile";
+import { from } from "rxjs/internal/observable/from";
+import { defer } from "rxjs";
 
 let output = document.getElementById("output");
 let button = document.getElementById("button");
@@ -29,6 +31,8 @@ const load = (url: string) => {
     }).pipe(retryWhen(retryStrategy({ attempts: 3, d: 1500 })));
 }
 
+loadWithFetch("movies.json");
+
 function retryStrategy({ attempts = 4, d = 1000 }) {
     return function (errors) {
         return errors.pipe(scan((acc, value) => {
@@ -36,6 +40,10 @@ function retryStrategy({ attempts = 4, d = 1000 }) {
             return acc + 1;
         }, 0), takeWhile(acc => acc < attempts), delay(d));
     }
+}
+
+function loadWithFetch(url: string) {
+    return defer(() => from(fetch(url).then(res => res.json())));
 }
 
 function renderMovies(movies) {
@@ -46,7 +54,7 @@ function renderMovies(movies) {
     })
 }
 
-click.pipe(mergeMap(e => load("movies.json"))).subscribe({
+click.pipe(mergeMap(e => loadWithFetch("movies.json"))).subscribe({
     next: renderMovies,
     error: err => console.log(`err: ${err}`),
     complete: () => console.log('complete')
