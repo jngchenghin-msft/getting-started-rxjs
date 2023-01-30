@@ -19,15 +19,25 @@ export const load = (url: string) => {
     }).pipe(retryWhen(retryStrategy({ attempts: 3, d: 1500 })));
 }
 
-export function retryStrategy({ attempts = 4, d = 1000 }) {
+export function retryStrategy({ attempts = 4, d = 1000 } = {}) {
     return function (errors) {
         return errors.pipe(scan((acc, value) => {
-            console.log(acc, value);
-            return acc + 1;
-        }, 0), takeWhile(acc => acc < attempts), delay(d));
+            acc++;
+            if (acc < attempts) {
+                return acc;
+            } else {
+                throw new Error(value.toString());
+            }
+        }, 0), delay(d));
     }
 }
 
 export function loadWithFetch(url: string) {
-    return defer(() => from(fetch(url).then(res => res.json())));
+    return defer(() => from(fetch(url).then(res => {
+        if (res.status === 200) {
+            return res.json();
+        } else {
+            return Promise.reject(res);
+        }
+    }))).pipe(retryWhen(retryStrategy()));
 }
