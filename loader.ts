@@ -4,7 +4,7 @@ export const load = (url: string) => {
     return new Observable(observer => {
         let xhr = new XMLHttpRequest();
 
-        xhr.addEventListener("load", () => {
+        const onLoad = () => {
             if (xhr.status === 200) {
                 let data = JSON.parse(xhr.responseText);
                 observer.next(data);
@@ -12,10 +12,18 @@ export const load = (url: string) => {
             } else {
                 observer.error(xhr.statusText);
             }
-        })
+        }
+
+        xhr.addEventListener("load", onLoad);
 
         xhr.open("GET", url);
         xhr.send();
+
+        return () => {
+            console.log('cleanup');
+            xhr.removeEventListener("load", onLoad);
+            xhr.abort();
+        }
     }).pipe(retryWhen(retryStrategy({ attempts: 3, d: 1500 })));
 }
 
